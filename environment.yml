@@ -1,0 +1,19 @@
+
+name: itmlogic
+channels:
+  - conda-forge
+dependencies:
+  - python=3.8
+  - gdal
+  - numpy
+  - fiona
+  - shapely
+  - rtree
+  - rasterio
+  - pyproj
+  - tqdm
+  - pytest
+  - rasterstats
+  - pandas
+  - matplotlib
+

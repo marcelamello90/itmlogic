@@ -152,6 +152,40 @@ def terrain_p2p(dem, line):
         Location of geojson sampling points.
 
     """
+
+    line_geom = LineString(line['geometry']['coordinates'])
+
+    # Geographic distance
+    geod = pyproj.Geod(ellps="WGS84")
+    distance_m = geod.geometry_length(line_geom)
+    distance_km = distance_m / 1e3
+
+    # Interpolate along line to get sampling points
+    num_samples = determine_num_samples(distance_m)
+    steps = np.interp(range(num_samples), [0, num_samples], [0, line_geom.length])
+    point_geoms = [line_geom.interpolate(currentdistance) for currentdistance in steps]
+
+    # Sample elevation profile
+    surface_profile = point_query(point_geoms, dem)
+    #print(surface_profile)
+
+    # Handle None values in surface_profile
+    #surface_profile = [0.0 if z is None else z for z in surface_profile]
+
+    # Put together point features with raster values
+    points = [
+        {
+            'type': 'Feature',
+            'geometry': mapping(point),
+            'properties': {
+                'elevation': float(z),
+            }
+        }
+        
+        for point, z in zip(point_geoms, surface_profile)
+    ]
+    return surface_profile, distance_km, points
+"""
     line_geom = LineString(line['geometry']['coordinates'])
 
     # Geographic distance
@@ -179,7 +213,7 @@ def terrain_p2p(dem, line):
         for point, z in zip(point_geoms, surface_profile)
     ]
     return surface_profile, distance_km, points
-
+"""
 
 def determine_num_samples(distance_m):
     """
